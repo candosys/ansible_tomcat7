@@ -1,0 +1,23 @@
+---
+language: python
+python: 
+  - "2.7"
+before_install:
+ - sudo apt-get update -qq
+ - sudo apt-get install -qq python-apt python-pycurl
+ - sudo pwd 
+install:
+  - pip install ansible
+script:
+  - echo localhost > test/inventory
+  - ansible-playbook -i test/inventory --syntax-check test/test.yml
+  - ansible-playbook -i test/inventory --connection=local --sudo -vvvv test/test.yml
+  - >
+    ansible-playbook -i test/inventory test/test.yml --connection=local --sudo
+    | grep -q 'changed=0.*failed=0'
+    && (echo 'Idempotence test: pass' && exit 0)
+    || (echo 'Idempotence test: fail' && exit 1)
+
+notifications:
+  email:
+    - vukovic.sasa90@gmail.com
